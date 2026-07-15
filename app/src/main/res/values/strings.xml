@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">UberClone</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="exit">Exit</string>
+    <string name="api_key">AIzaSyCTxle8zvYU-pM41AS2MR2zoWo2gO9gRwk</string>
+    <string name="send_request_to_driver_failed">Send request to driver failed\n</string>
+    <string name="token_not_found">Token not found\n</string>
+
+    <string name="loading_preparing_map">Preparing your map...</string>
+    <string name="loading_connecting">Connecting...</string>
+    <string name="loading_offline">Going offline...</string>
+    <string name="loading_almost_ready">Almost ready...</string>
+    <string name="loading_getting_location">Getting your location...</string>
+    <string name="loading_route">Calculating best route...</string>
+    <string name="loading_accepting_ride">Accepting ride...</string>
+    <string name="loading_cancelling_ride">Cancelling ride...\n</string>
+    <string name="loading_completing_trip">Completing trip...</string>
+    <string name="loading_starting_trip">Starting trip...</string>
+</resources>

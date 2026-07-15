@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Brand -->
+    <color name="colorPrimary">#111111</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#22C55E</color>
+
+    <!-- Background -->
+    <color name="colorBackground">#F8F5F5</color>
+    <color name="colorSurface">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="textPrimary">#111111</color>
+    <color name="textSecondary">#6B7280</color>
+    <color name="loading_item">#ACAEBA</color>
+    <color name="nav_text">#374151</color>
+
+    <!-- Status -->
+    <color name="colorSuccess">#22C55E</color>
+    <color name="colorWarning">#F59E0B</color>
+    <color name="colorError">#EF4444</color>
+
+    <!-- Divider -->
+    <color name="divider">#E5E7EB</color>
+
+    <!-- Disabled -->
+    <color name="disabled">#D1D5DB</color>
+
+    <!-- White & Black -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+</resources>

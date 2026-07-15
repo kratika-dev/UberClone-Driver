@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <TextView
+        android:id="@+id/txtUber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UBER"
+        android:textColor="@android:color/white"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:layout_centerInParent="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_phone_sign_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:drawableStart="@drawable/ic_phone"
+            android:drawablePadding="12dp"
+            android:text="SIGN IN WITH PHONE"
+            android:textColor="@android:color/black"
+            android:paddingStart="8dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_google_sign_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/white"
+            android:drawableStart="@drawable/ic_google"
+            android:drawablePadding="12dp"
+            android:text="SIGN IN WITH GOOGLE"
+            android:textColor="@android:color/black"
+            android:paddingStart="8dp"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
