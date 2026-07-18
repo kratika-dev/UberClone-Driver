@@ -33,6 +33,8 @@ import de.hdodenhof.circleimageview.CircleImageView
 import java.lang.StringBuilder
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import android.os.Build
+import android.provider.Settings
 
 class HomeActivity : AppCompatActivity() {
 
@@ -58,14 +60,68 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var storageReference: StorageReference
     private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (!isGranted) {
-                Snackbar.make(
-                    binding.root,
-                    "Location permission is required",
-                    Snackbar.LENGTH_LONG
-                ).show()
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val fineLocation =
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+            val coarseLocation =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+
+            if (!fineLocation && !coarseLocation) {
+
+                if (!shouldShowRequestPermissionRationale(
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                ) {
+
+                    showPermissionSettingsDialog(
+                        "Location permission is permanently denied. Please enable it from settings."
+                    )
+
+                } else {
+
+                    Snackbar.make(
+                        binding.root,
+                        "Location permission is required",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+
+                }
             }
+        }
+
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+
+            if (!isGranted) {
+
+                if (!shouldShowRequestPermissionRationale(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                ) {
+
+                    showPermissionSettingsDialog(
+                        "Notification permission is permanently denied. Please enable it from settings."
+                    )
+
+                } else {
+
+                    Snackbar.make(
+                        binding.root,
+                        "Notification permission is recommended",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+
+                }
+            }
+
+            // continue to location permission
+            checkLocationPermission()
         }
 
 
@@ -113,13 +169,7 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
+        checkNotificationPermission()
 
     }
 
@@ -327,5 +377,81 @@ class HomeActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_home)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private fun checkNotificationPermission() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            notificationPermissionLauncher.launch(
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+
+        } else {
+
+            checkLocationPermission()
+
+        }
+    }
+
+
+
+    private fun checkLocationPermission() {
+
+        val fineGranted =
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+
+        val coarseGranted =
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+
+        if (!fineGranted && !coarseGranted) {
+
+            requestPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+
+
+    private fun showPermissionSettingsDialog(message: String) {
+
+        AlertDialog.Builder(this)
+            .setTitle("Permission Required")
+            .setMessage(message)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Settings") { _, _ ->
+                openAppSettings()
+            }
+            .show()
+    }
+
+
+
+    private fun openAppSettings() {
+
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.parse("package:$packageName")
+        )
+
+        startActivity(intent)
+
     }
 }

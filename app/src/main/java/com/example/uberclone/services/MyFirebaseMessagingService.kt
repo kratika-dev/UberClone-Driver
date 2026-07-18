@@ -25,12 +25,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(message)
         val data = message.data
 
-        Log.d("FCM_TEST", "Title = ${data[Constants.NOTI_TITLE]}")
-        Log.d("FCM_TEST", "Body = ${data[Constants.NOTI_BODY]}")
-        Log.d("FCM_TEST", "RiderKey = ${data[Constants.RIDER_KEY]}")
-        Log.d("FCM_TEST", "Pickup = ${data[Constants.PICKUP_LOCATION]}")
-        Log.d("FCM_TEST", "RequestId = ${data[Constants.REQUEST_ID]}")
-
         if (data.isNotEmpty()) {
 
             when (data[Constants.NOTI_TITLE]) {

@@ -239,9 +239,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         showLoading(getString(R.string.loading_preparing_map))
 
         init()
-
-        Log.d("AUTH_CHECK", "Driver UID = ${FirebaseAuth.getInstance().currentUser?.uid}")
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment =
             childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
@@ -261,14 +258,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onDriverRequestReceived(event: DriverRequestReceived) {
-
-        Log.d("REQUEST_DEBUG", "Start Trip clicked")
-        Log.d("REQUEST_DEBUG", "driverRequestReceived = $driverRequestReceived")
-        Log.d("REQUEST_DEBUG", "requestId = ${driverRequestReceived?.requestId}")
-
         driverRequestReceived = event
-
-        Log.d("REQUEST_DEBUG", "Assigned requestId = ${driverRequestReceived?.requestId}")
 
         hasArrivedAtPickup = false
 
@@ -444,18 +434,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                     }, 300)
                 }
-                Log.d(
-                    "LOCATION_CALLBACK",
-                    "Location = ${location.latitude}, ${location.longitude}"
-                )
-
                 handleDriverNavigation(location)
-
-                Log.d("LOCATION", "Location callback called")
-                Log.d(
-                    "LOCATION",
-                    "Lat: ${location.latitude}, Lng: ${location.longitude}"
-                )
 
                 updateDriverLocationInFirebase(location)
             }
@@ -466,11 +445,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
 
-//        fusedLocationProviderClient.requestLocationUpdates(
-//            locationRequest,
-//            locationCallback,
-//            Looper.getMainLooper()
-//        )
     }
 
     private fun showLoading(message: String = "Please wait...") {
@@ -591,8 +565,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             mMap.clear()
             circularProgressBar.progress = 0f
 
-            Log.d("DECLINE_TEST", "requestId = ${driverRequestReceived?.key}")
-
             UserUtils.sendDeclineRequest(
                 root_layout,
                 activity,
@@ -690,8 +662,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             .child("status")
             .setValue("TRIP_STARTED")
             .addOnSuccessListener {
-                Log.d("TRIP_STATUS", "Trip started status updated")
-
                 UserUtils.sendTripStartedRequest(
                     root_layout,
                     activity,
@@ -699,9 +669,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     driverRequestReceived!!.requestId
                 )
             }
-            .addOnFailureListener {
-                Log.e("TRIP_STATUS", it.message ?: "Error")
-            }
+            .addOnFailureListener {}
 
         showLoading(getString(R.string.loading_starting_trip))
 
@@ -952,9 +920,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     R.raw.user_maps_style
                 )
             })
-            if (!success) {
-                Log.d("Google Map", "error")
-            }
+            if (!success) { }
         } catch (e: Resources.NotFoundException) {
             e.printStackTrace()
         }
@@ -968,8 +934,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             location.latitude,
             location.longitude
         )
-
-        Log.d("DRIVER_MARKER", "isDriverBusy = $isDriverBusy")
 
         if (isDriverBusy) {
 
@@ -1006,25 +970,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 location.longitude,
                 1
             )
-
-            Log.d("STEP1", "Location callback called")
-
-
             val cityName = addressList?.get(0)!!.locality
-
-            Log.d("STEP2", "City = $cityName")
-
             driversLocationReference =
                 FirebaseDatabase.getInstance()
                     .getReference(Constants.DRIVER_LOCATION_REFERENCE).child(cityName)
-
-
-            Log.d(
-                "STEP3",
-                "Path = ${Constants.DRIVER_LOCATION_REFERENCE}/$cityName"
-            )
-
-
 
             currentUserRef =
                 driversLocationReference.child(
@@ -1046,18 +995,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                     if (error != null) {
 
-                        Log.e("GEOFIRE", error.message)
-
                     } else {
-
-                        Log.d("GEOFIRE", "Location Updated")
-
                     }
 
                 }
             }
-
-
         } catch (e: IOException) {
             Snackbar.make(requireView(), e.message!!, Snackbar.LENGTH_LONG).show()
         }
@@ -1066,9 +1008,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun createDriverMarker(position: LatLng) {
-
-        Log.d("DRIVER_MARKER", "Creating driver marker")
-
         driverMarker = mMap.addMarker(
             MarkerOptions()
                 .position(position)
@@ -1191,25 +1130,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private fun updateNavigationCamera(position: LatLng, bearing: Float) {
 
         val pickup = pickupLatLng ?: return
-
-
-        Log.d(
-            "CAMERA_DEBUG",
-            "updateNavigationCamera called"
-        )
-
-
         val distanceToPickup = getDistanceBetween(
             position,
             pickup
         )
-
-
-        Log.d(
-            "CAMERA_DEBUG",
-            "Distance to pickup = $distanceToPickup"
-        )
-
 
         // Avoid camera updates too frequently
         val currentTime = System.currentTimeMillis()
@@ -1297,13 +1221,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateLiveRoute() {
-
-        Log.d(
-            "LIVE_ROUTE",
-            "Updating route from ${currentLocation!!.latitude},${currentLocation!!.longitude} to ${destinationLatLng}"
-        )
-
-
         if (!hasStartedTrip) return
 
         if (destinationLatLng == null) return
@@ -1320,32 +1237,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             val distance =
                 currentLocation!!.distanceTo(lastRouteLocation!!)
 
-
-            Log.d(
-                "LIVE_ROUTE",
-                "Distance since last update = $distance"
-            )
-
-
-            Log.d(
-                "LIVE_ROUTE",
-                "LastRouteLocation = ${lastRouteLocation?.latitude}, ${lastRouteLocation?.longitude}"
-            )
-
-            Log.d(
-                "LIVE_ROUTE",
-                "CurrentLocation = ${currentLocation?.latitude}, ${currentLocation?.longitude}"
-            )
-
-
             if (distance < ROUTE_UPDATE_DISTANCE)
                 return
         }
 
         lastRouteUpdateTime = currentTime
         lastRouteLocation = Location(currentLocation!!)
-
-        Log.d("LIVE_ROUTE", "Refreshing route...")
 
         drawRoute(
             LatLng(
@@ -1360,17 +1257,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private fun drawRoute(origin: LatLng, destination: LatLng) {
 
         if (isRouteDrawing) {
-            Log.d("ROUTE_DEBUG", "Skipping route request. Previous request still running.")
             return
         }
 
         isRouteDrawing = true
-
-        Log.d(
-            "ROUTE_CALL",
-            "Origin=$origin Destination=$destination"
-        )
-
 
         compositeDisposable.add(
             googleAPI.getDirections(
@@ -1396,28 +1286,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                             isRouteDrawing = false
 
-
-
-                            Log.d(
-                                "ROUTE_DEBUG",
-                                "Route drawn: $origin -> $destination"
-                            )
-
                         } catch (e: Exception) {
 
                             isRouteDrawing = false
 
 
-                            Toast.makeText(
-                                requireContext(),
-                                "Unable to calculate the route.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            Log.e(
-                                "ROUTE_DEBUG",
-                                e.message ?: ""
-                            )
+                            Toast.makeText(requireContext(), "Unable to calculate the route.", Toast.LENGTH_SHORT).show()
                         }
 
                     },
@@ -1426,18 +1300,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                         isRouteDrawing = false
 
-
-                        Toast.makeText(
-                            requireContext(),
-                            "Unable to connect. Please check your internet.",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                        Log.e(
-                            "ROUTE_DEBUG",
-                            "Directions API failed",
-                            throwable
-                        )
+                        Toast.makeText(requireContext(), "Unable to connect. Please check your internet.", Toast.LENGTH_LONG).show()
                     }
 
                 )
@@ -1525,10 +1388,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         pickupLatLng = destination
 
-        Log.d("NAV_DEBUG", "Origin = $origin")
-
-        Log.d("NAV_DEBUG", "Destination = $destination")
-
         drawRoute(origin, destination)
 
         pickupMarker?.remove()
@@ -1611,13 +1470,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         )
 
         val distance = result[0]
-
-        Log.d(
-            "ARRIVAL_DEBUG",
-            "Distance = $distance meters"
-        )
-
-
         if (!hasArrivedAtPickup &&
             isWithinDistance(driverLocation, pickup, 15000f)
         ) {
@@ -1652,8 +1504,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         val distance = result[0]
 
-        Log.d("DESTINATION_DEBUG", "Distance = $distance meters")
-
         if (
             isWithinDistance(
                 driverLocation,
@@ -1663,8 +1513,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         ) {
 
             hasArrivedAtDestination = true
-
-            Log.d("DESTINATION_DEBUG", "Driver reached destination")
 
             btnCancelRide.visibility = View.GONE
             layoutTripControl.visibility = View.VISIBLE
@@ -1848,16 +1696,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         driverInfoRef.child("isBusy")
             .setValue(busy)
-            .addOnSuccessListener {
-
-                Log.d("BUSY_STATUS", "Saved = $busy")
-
-            }
-            .addOnFailureListener {
-
-                Log.e("BUSY_STATUS", it.message ?: "")
-
-            }
+            .addOnSuccessListener {}
+            .addOnFailureListener {}
 
     }
 
@@ -1866,23 +1706,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         driverInfoRef.child("isOnline")
             .get()
             .addOnSuccessListener { snapshot ->
-
-                Log.d("ONLINE_DEBUG", "Snapshot exists = ${snapshot.exists()}")
-                Log.d("ONLINE_DEBUG", "Snapshot value = ${snapshot.value}")
-
                 isDriverOnline =
                     snapshot.getValue(Boolean::class.java) ?: false
-
-                Log.d("ONLINE_DEBUG", "Restored = $isDriverOnline")
-
                 updateDriverStatusUI(isDriverOnline)
-
-
             }
-            .addOnFailureListener {
-
-                Log.e("ONLINE_DEBUG", "Restore failed", it)
-            }
+            .addOnFailureListener {}
     }
 
     private fun restoreBusyStatus() {
@@ -1893,23 +1721,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                 isDriverBusy =
                     snapshot.getValue(Boolean::class.java) ?: false
-
-
-                Log.d(
-                    "BUSY_DEBUG",
-                    "Restored busy = $isDriverBusy"
-                )
-
             }
-            .addOnFailureListener {
-
-                Log.e(
-                    "BUSY_DEBUG",
-                    "Restore failed",
-                    it
-                )
-
-            }
+            .addOnFailureListener {}
 
     }
 
@@ -1928,21 +1741,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 val status = snapshot.child("status")
                     .getValue(String::class.java)
 
-                Log.d("RIDE_CANCEL", "RequestId=$requestId Status=$status")
-
                 when (status) {
 
                     "CANCELLED" -> {
-
-                        Log.d("RIDE_CANCEL", "Ride cancelled")
-
                         onRideCancelledByRider()
                     }
 
                     "TRIP_STARTED" -> {
-
-                        Log.d("TRIP_STATUS", "Trip started confirmed")
-
                         hasStartedTrip = true
                         hasArrivedAtDestination = false
 
@@ -1952,25 +1757,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 }
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("RIDE_CANCEL", error.message)
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
 
         rideRequestRef!!.addValueEventListener(rideRequestListener!!)
     }
 
     private fun loadRideDetails(requestId: String, onSuccess: () -> Unit) {
-
-        Log.d("TRIP_DEBUG", "loadRideDetails() requestId = $requestId")
-
         FirebaseDatabase.getInstance()
             .getReference(Constants.RIDE_REQUEST_REFERENCE)
             .child(requestId)
             .get()
             .addOnSuccessListener { snapshot ->
-                Log.d("RIDE_DETAILS", "requestId = $requestId")
-                Log.d("RIDE_DETAILS", "Snapshot exists = ${snapshot.exists()}")
                 if (!snapshot.exists()) return@addOnSuccessListener
 
                 hideLoading()
@@ -1991,8 +1789,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     snapshot.child("pickupAddress")
                         .getValue(String::class.java) ?: ""
 
-                Log.d("RIDE_DETAILS", "pickup = $pickupAddress")
-
                 val destinationAddress =
                     snapshot.child("destinationAddress")
                         .getValue(String::class.java) ?: ""
@@ -2009,14 +1805,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     snapshot.child("estimatedFare")
                         .getValue(Double::class.java) ?: 0.0
 
-
-                Log.d("RIDE_DETAILS", "pickup = $pickupAddress")
-                Log.d("RIDE_DETAILS", "destination = $destinationAddress")
-                Log.d("RIDE_DETAILS", "duration = $duration")
-                Log.d("RIDE_DETAILS", "distance = $distance")
-                Log.d("RIDE_DETAILS", "fare = $estimatedFare")
-
-
                 if (destinationLat == null || destinationLng == null) {
 
                     hideLoading()
@@ -2024,11 +1812,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     chip_accept.isEnabled = true
                     chip_decline.isEnabled = true
 
-                    Toast.makeText(
-                        requireContext(),
-                        "Invalid destination",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Invalid destination", Toast.LENGTH_SHORT).show()
 
                     return@addOnSuccessListener
                 }
@@ -2043,14 +1827,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 txt_estimate_time.text = duration
                 txt_estimate_distance.text = distance
                 txtEstimatedFare.text = "₹${estimatedFare.toInt()}"
-
-
-
-                Log.d("UI_CHECK", "Pickup TextView = ${txtPickupAddress.text}")
-                Log.d("UI_CHECK", "Destination TextView = ${txtDestinationAddress.text}")
-                Log.d("UI_CHECK", "Duration TextView = ${txt_estimate_time.text}")
-                Log.d("UI_CHECK", "Distance TextView = ${txt_estimate_distance.text}")
-                Log.d("UI_CHECK", "Fare TextView = ${txtEstimatedFare.text}")
 
                 onSuccess()
             }.addOnFailureListener {
@@ -2075,9 +1851,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun onRideCancelledByRider() {
-
-        Log.d("RIDE_CANCEL", "onRideCancelledByRider() called")
-
         // Driver is available again
         isDriverBusy = false
         updateDriverBusyStatus(false)
@@ -2109,15 +1882,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         circularProgressBar.progress = 0f
 
         // Notify driver
-        Toast.makeText(
-            requireContext(),
-            "Ride cancelled by rider",
-            Toast.LENGTH_SHORT
-        ).show()
+        Toast.makeText(requireContext(), "Ride cancelled by rider", Toast.LENGTH_SHORT).show()
 
         resetRouteTracking()
-
-        Log.d("RIDE_CANCEL", "Driver is ready for new ride requests")
     }
 
     private fun resetRouteTracking() {

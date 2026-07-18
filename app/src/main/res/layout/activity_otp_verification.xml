@@ -57,7 +57,8 @@
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusBottomEnd="16dp"
-            app:boxStrokeColor="@android:color/white">
+            app:boxStrokeColor="@android:color/white"
+            app:hintTextColor="@android:color/white">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editOtp"

@@ -2,6 +2,7 @@ package com.example.uberclone.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.uberclone.databinding.ActivityLoginBinding
@@ -27,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        Log.d("LOGIN_DEBUG", "Login onCreate")
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -126,5 +127,9 @@ class LoginActivity : AppCompatActivity() {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
+    override fun onDestroy() {
+        Log.d("LOGIN_DEBUG", "Login onDestroy")
+        super.onDestroy()
+    }
 
 }

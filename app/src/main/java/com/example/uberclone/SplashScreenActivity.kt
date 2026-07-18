@@ -2,11 +2,8 @@ package com.example.uberclone
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.uberclone.model.DriverInfoModel
 import com.example.uberclone.ui.HomeActivity
@@ -20,205 +17,54 @@ import com.google.firebase.database.ValueEventListener
 import io.reactivex.rxjava3.core.Completable
 import java.util.concurrent.TimeUnit
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import android.Manifest
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.content.pm.PackageManager
-import android.os.Build
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.animation.AnimationUtils
-import androidx.core.content.ContextCompat
 import com.example.uberclone.ui.LoginActivity
 import com.example.uberclone.ui.RegisterActivity
+import com.example.uberclone.utils.NetworkMonitor
+import com.example.uberclone.utils.SnackbarUtils
 import com.example.uberclone.utils.UserUtils
 import com.google.firebase.messaging.FirebaseMessaging
-
+import io.reactivex.rxjava3.disposables.Disposable
 
 class SplashScreenActivity : AppCompatActivity() {
     companion object {
-        private const val SPLASH_DELAY = 1500L
+        private const val SPLASH_DELAY = 3000L
     }
 
+    private var splashDisposable: Disposable? = null
+    private lateinit var networkMonitor: NetworkMonitor
+
+    private var authListenerAdded = false
+
+    private lateinit var rootView: View
     private lateinit var imgLogo: ImageView
     private lateinit var txtTagline: TextView
     private lateinit var loadingDots: View
-
-    //  private lateinit var providers: List<AuthUI.IdpConfig>
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var listener: FirebaseAuth.AuthStateListener
-
-    //  private lateinit var getResult: ActivityResultLauncher<Intent>
 
     private lateinit var database: FirebaseDatabase
 
     private lateinit var driverInfoRef: DatabaseReference
 
-
-    private lateinit var notificationPermissionLauncher: ActivityResultLauncher<String>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_splash_screen)
 
+        rootView = findViewById(android.R.id.content)
         imgLogo = findViewById(R.id.imgLogo)
         txtTagline = findViewById(R.id.txtTagline)
         loadingDots = findViewById(R.id.loadingDots)
 
 
-        notificationPermissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted ->
-
-                if (isGranted) {
-                    Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT)
-                        .show()
-                } else {
-                    Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT)
-                        .show()
-                }
-
-                // Continue regardless of the user's choice
-                checkLocationPermission()
-            }
-
-
-//        getResult =
-//            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//                if (result.resultCode == Activity.RESULT_OK) {
-//                    loadingDots.visibility = View.GONE
-//                    loadingDots.clearAnimation()
-//
-//                    checkUserFromFirebase()
-//                } else {
-//
-//                    loadingDots.visibility = View.GONE
-//                    loadingDots.clearAnimation()
-//
-//                    val response = IdpResponse.fromResultIntent(result.data)
-//
-//                    Toast.makeText(
-//
-//                        this,
-//
-//                        response?.error?.message ?: "Sign in cancelled",
-//
-//                        Toast.LENGTH_LONG
-//
-//                    ).show()
-//
-//                }
-//
-//            }
-
-
-        init()
-
-        animateLogo {
-            animateTagline()
-            displaySplashScreen()
-        }
-    }
-
-    private fun animateLogo(onAnimationEnd: (() -> Unit)? = null) {
-        imgLogo.apply {
-            scaleX = 0.8f
-            scaleY = 0.8f
-            alpha = 0f
-            elevation = 0f
-        }
-
-        val fadeAnimator = ObjectAnimator.ofFloat(imgLogo, View.ALPHA, 0f, 1f)
-        val scaleXAnimator = ObjectAnimator.ofFloat(imgLogo, View.SCALE_X, 0.8f, 1f)
-        val scaleYAnimator = ObjectAnimator.ofFloat(imgLogo, View.SCALE_Y, 0.8f, 1f)
-
-        AnimatorSet().apply {
-
-            playTogether(
-                fadeAnimator,
-                scaleXAnimator,
-                scaleYAnimator
-            )
-
-            duration = 900
-            interpolator = AccelerateDecelerateInterpolator()
-
-            addListener(object : AnimatorListenerAdapter() {
-
-                override fun onAnimationEnd(animation: Animator) {
-
-                    imgLogo.animate()
-                        .translationZ(8f)
-                        .setDuration(300)
-                        .start()
-
-                    startLogoFloatingAnimation()
-
-                    onAnimationEnd?.invoke()
-                }
-            })
-
-            start()
-        }
-    }
-
-    private fun animateTagline() {
-        txtTagline.apply {
-            alpha = 0f
-            translationY = 20f
-        }
-
-        txtTagline.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(500)
-            .setStartDelay(150)
-            .start()
-    }
-
-    private fun startLogoFloatingAnimation() {
-        imgLogo.animate()
-            .translationY(-8f)
-            .setDuration(1200)
-            .withEndAction {
-                imgLogo.animate()
-                    .translationY(0f)
-                    .setDuration(1200)
-                    .withEndAction {
-                        startLogoFloatingAnimation()
-                    }
-                    .start()
-            }
-            .start()
-    }
-
-    override fun onStart() {
-        super.onStart()
-    }
-
-
-    private fun displaySplashScreen() {
-        Completable.timer(SPLASH_DELAY, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .subscribe {
-                loadingDots.visibility = View.VISIBLE
-
-                startLoadingAnimation()
-                firebaseAuth.addAuthStateListener(listener)
-            }
-    }
-
-    private fun init() {
         firebaseAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
         driverInfoRef = database.getReference(Constants.DRIVER_INFO_REFERENCE)
 
         listener = FirebaseAuth.AuthStateListener { myFirebaseAuth ->
-
             val user = myFirebaseAuth.currentUser
 
             if (user != null) {
@@ -236,29 +82,66 @@ class SplashScreenActivity : AppCompatActivity() {
 
             }
         }
+
+
+        networkMonitor = NetworkMonitor(this, object : NetworkMonitor.NetworkListener {
+
+            override fun onNetworkAvailable() {
+                SnackbarUtils.hideNoInternet()
+
+                if (!isFinishing && !isDestroyed) {
+                    addFirebaseAuthListener()
+                }
+            }
+
+            override fun onNetworkLost() {
+                SnackbarUtils.showNoInternet(window.decorView.rootView)
+            }
+        })
+
+
+
+        imgLogo.visibility = View.VISIBLE
+        txtTagline.visibility = View.VISIBLE
+        displaySplashScreen()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
     }
 
 
-    private fun showLoginLayout() {
+    private fun displaySplashScreen() {
+        splashDisposable = Completable
+            .timer(SPLASH_DELAY, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .subscribe {
+                loadingDots.visibility = View.VISIBLE
+                startLoadingAnimation()
+                networkMonitor.register()
+                if (networkMonitor.isConnected()) {
+                    addFirebaseAuthListener()
+                } else {
+                    SnackbarUtils.showNoInternet(window.decorView.rootView)
+                }
+            }
+    }
 
+
+    private fun addFirebaseAuthListener() {
+
+        if (authListenerAdded) {
+            return
+        }
+
+        authListenerAdded = true
+
+        firebaseAuth.addAuthStateListener(listener)
+    }
+
+    private fun showLoginLayout() {
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
-
-//        loadingDots.visibility = View.VISIBLE
-//        startLoadingAnimation()
-//
-//        val authMethodPickerLayout = AuthMethodPickerLayout.Builder(R.layout.sign_in_layout)
-//            .setPhoneButtonId(R.id.button_phone_sign_in)
-//            .setGoogleButtonId(R.id.button_google_sign_in)
-//            .build()
-//
-//        val signInIntent = AuthUI.getInstance()
-//            .createSignInIntentBuilder()
-//            .setTheme(R.style.LoginTheme)
-//            .setAvailableProviders(providers)
-//            .build()
-//
-//        getResult.launch(signInIntent)
     }
 
     private fun checkUserFromFirebase() {
@@ -297,7 +180,6 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.d("TEST", error.message)
                     loadingDots.visibility = View.GONE
                     loadingDots.clearAnimation()
                     Toast.makeText(this@SplashScreenActivity, error.toString(), Toast.LENGTH_SHORT)
@@ -312,188 +194,15 @@ class SplashScreenActivity : AppCompatActivity() {
         loadingDots.visibility = View.GONE
         loadingDots.clearAnimation()
         Constants.currentUser = model
-        checkPermissions()
+        startHome()
     }
 
-//    private fun showRegisterUserLayout() {
-//        val builder = AlertDialog.Builder(this, R.style.DialogTheme)
-//        val itemView = LayoutInflater.from(this).inflate(R.layout.register_layout, null)
-//
-//        val edit_text_name = itemView.findViewById<View>(R.id.edit_first_name) as TextInputEditText
-//        val edit_text_last_name =
-//            itemView.findViewById<View>(R.id.edit_last_name) as TextInputEditText
-//        val edit_text_phone_number =
-//            itemView.findViewById<View>(R.id.edit_phone) as TextInputEditText
-//
-//        val button_continue = itemView.findViewById<Button>(R.id.button_register)
-//
-//        FirebaseAuth.getInstance().currentUser?.phoneNumber?.let {
-//
-//            edit_text_phone_number.setText(it)
-//
-//        }
-//
-//        builder.setView(itemView)
-//        val dialog = builder.create()
-//        dialog.show()
-//
-//        dialog.window?.apply {
-//            setLayout(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.MATCH_PARENT
-//            )
-//            setBackgroundDrawable(ColorDrawable(Color.parseColor("#121212")))
-//        }
-//
-//        button_continue.setOnClickListener {
-//            if (edit_text_name.text.toString().trim().isEmpty()) {
-//
-//                Toast.makeText(this, "Please enter a first name", Toast.LENGTH_SHORT).show()
-//
-//                return@setOnClickListener
-//
-//            } else if (edit_text_last_name.text.toString().trim().isEmpty()) {
-//
-//                Toast.makeText(this, "Please enter a last name", Toast.LENGTH_SHORT).show()
-//
-//                return@setOnClickListener
-//
-//            } else if (edit_text_phone_number.text.toString().trim().isEmpty()) {
-//
-//                Toast.makeText(this, "Please enter a phone number", Toast.LENGTH_SHORT).show()
-//
-//                return@setOnClickListener
-//
-//            } else {
-//                val model = DriverInfoModel(
-//                    edit_text_name.text.toString(),
-//                    edit_text_last_name.text.toString(),
-//                    edit_text_phone_number.text.toString(),
-//                    "",
-//                    0f,
-//                    0f,
-//                    0
-//                )
-//                driverInfoRef.child(FirebaseAuth.getInstance().currentUser!!.uid)
-//                    .setValue(model)
-//                    .addOnFailureListener {
-//
-//                        Toast.makeText(
-//                            this@SplashScreenActivity,
-//                            "${it.message}",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                        dialog.dismiss()
-//                        loadingDots.visibility = View.GONE
-//                        loadingDots.clearAnimation()
-//                    }
-//                    .addOnSuccessListener {
-//
-//                        Toast.makeText(
-//                            this@SplashScreenActivity,
-//                            "Register Successfully",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                        dialog.dismiss()
-//                        goToHomeActivity(model)
-//                        loadingDots.visibility = View.GONE
-//                        loadingDots.clearAnimation()
-//
-//                    }
-//            }
-//
-//        }
-//    }
-
-    private fun checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestNotificationPermission()
-        } else {
-            checkLocationPermission()
-        }
-    }
-
-    private val locationPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-
-            val fineLocation =
-                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-
-            if (fineLocation) {
-                startHome()
-            } else {
-                Toast.makeText(
-                    this,
-                    "Location permission is required",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
 
     private fun startHome() {
         startActivity(Intent(this, HomeActivity::class.java))
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         finish()
     }
-
-    private fun requestNotificationPermission() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
-            when {
-
-                ContextCompat.checkSelfPermission(
-
-                    this,
-
-                    Manifest.permission.POST_NOTIFICATIONS
-
-                ) == PackageManager.PERMISSION_GRANTED -> {
-
-                    // Permission already granted
-
-                }
-
-                else -> {
-
-                    notificationPermissionLauncher.launch(
-
-                        Manifest.permission.POST_NOTIFICATIONS
-
-                    )
-
-                }
-
-            }
-
-        }
-
-    }
-
-    private fun checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            startHome()
-        } else {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-    }
-
 
     private fun startLoadingAnimation() {
 
@@ -524,9 +233,27 @@ class SplashScreenActivity : AppCompatActivity() {
         dot3.startAnimation(animation3)
     }
 
-
     override fun onStop() {
-        firebaseAuth.removeAuthStateListener(listener)
         super.onStop()
+
+        if (authListenerAdded) {
+            firebaseAuth.removeAuthStateListener(listener)
+            authListenerAdded = false
+        }
     }
+
+    override fun onDestroy() {
+        splashDisposable?.dispose()
+
+        networkMonitor.unregister()
+
+        if (authListenerAdded) {
+            firebaseAuth.removeAuthStateListener(listener)
+            authListenerAdded = false
+        }
+
+        super.onDestroy()
+    }
+
+
 }

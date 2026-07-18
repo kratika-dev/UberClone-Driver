@@ -63,9 +63,6 @@ class ReviewAdapter(
                 .format(Date(review.timestamp))
 
         holder.txtRiderName.text = review.riderName
-
-        Log.d("REVIEW_AVATAR", review.riderAvatar)
-
         if (review.riderAvatar.isNotEmpty()) {
 
             Picasso.get()
