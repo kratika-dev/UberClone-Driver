@@ -36,7 +36,8 @@
         android:src="@drawable/profile"
 
         app:civ_border_color="@android:color/white"
-        app:civ_border_width="2dp" />
+        app:civ_border_width="2dp"
+        app:civ_circle_background_color="@color/white"/>
 
 
     <!-- Rating Row -->

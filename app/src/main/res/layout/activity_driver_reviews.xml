@@ -100,9 +100,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="No reviews yet"
-            android:textAlignment="center"
+            android:gravity="center"
             android:textSize="18sp"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:layout_marginBottom="50dp"/>
 
     </FrameLayout>
 

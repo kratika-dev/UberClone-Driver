@@ -6,9 +6,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.uberclone.model.Token
-import com.example.uberclone.remote.FCMSendData
-import com.example.uberclone.remote.FCMService
-import com.example.uberclone.remote.RetrofitFCM
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -21,10 +18,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import com.example.uberclone.R
 import com.example.uberclone.model.AcceptNotificationRequest
 import com.example.uberclone.model.CancellationNotificationRequest
+import com.example.uberclone.model.DeclineNotificationRequest
 import com.example.uberclone.model.TripCompletedNotificationRequest
 import com.example.uberclone.model.TripStartedNotificationRequest
 import com.example.uberclone.remote.CloudFunctionService
-import com.example.uberclone.remote.Message
 import com.example.uberclone.remote.RetrofitCloudFunction
 
 
@@ -48,9 +45,11 @@ object UserUtils {
         Log.d("FCM_TOKEN", token)
         val tokenModel = Token(token)
 
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
         FirebaseDatabase.getInstance()
             .getReference(Constants.TOKEN_REFERENCE)
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child(uid)
             .setValue(tokenModel)   //Save Token object
             .addOnFailureListener { e ->
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
@@ -66,10 +65,12 @@ object UserUtils {
         riderId: String,
         requestId: String
     ) {
-        val compositeDisposable = CompositeDisposable()
-        val fcmService = RetrofitFCM.instance!!.create(FCMService::class.java)
 
-        //get token
+        val compositeDisposable = CompositeDisposable()
+
+        val cloudFunctionService =
+            RetrofitCloudFunction.instance!!.create(CloudFunctionService::class.java)
+
         FirebaseDatabase.getInstance()
             .getReference("RideRequests")
             .child(requestId)
@@ -79,28 +80,17 @@ object UserUtils {
         FirebaseDatabase.getInstance()
             .getReference(Constants.TOKEN_REFERENCE)
             .child(riderId)
-
-
             .addListenerForSingleValueEvent(object : ValueEventListener {
+
                 override fun onDataChange(snapshot: DataSnapshot) {
+
                     if (snapshot.exists()) {
+
                         val tokenModel = snapshot.getValue(Token::class.java)
-                        val notificationData: MutableMap<String, String> = HashMap()
-                        notificationData.put(Constants.NOTI_TITLE, Constants.REQUEST_DRIVER_DECLINE)
-                        notificationData.put(
-                            Constants.NOTI_BODY,
-                            "Driver declined your ride request"
-                        )
-                        notificationData.put(
-                            Constants.DRIVER_KEY,
-                            FirebaseAuth.getInstance().currentUser!!.uid
-                        )
-
-                        val accessToken = ""
-
                         val riderToken = tokenModel?.token
 
                         if (riderToken.isNullOrEmpty()) {
+
                             Snackbar.make(
                                 view,
                                 activity!!.getString(R.string.token_not_found),
@@ -109,40 +99,56 @@ object UserUtils {
                             return
                         }
 
-                        Log.d("ACCEPT_TEST", notificationData.toString())
-
-                        val fcmSendData = FCMSendData(
-                            Message(
-                                riderToken,
-                                notificationData
-                            )
+                        val request = DeclineNotificationRequest(
+                            riderToken = riderToken,
+                            driverKey = FirebaseAuth.getInstance().currentUser!!.uid,
+                            requestId = requestId
                         )
 
                         compositeDisposable.add(
-                            fcmService.sendNotification(accessToken, fcmSendData)
-                                .subscribeOn(Schedulers.newThread())
+                            cloudFunctionService.sendDeclineNotification(request)
+                                .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe({ fcmResponse ->
-                                    if (fcmResponse.name.isNullOrEmpty()) {
-                                        compositeDisposable.clear()
-                                        Snackbar.make(
-                                            view,
-                                            activity!!.getString(R.string.send_request_to_driver_failed),
-                                            Snackbar.LENGTH_LONG
+                                .subscribe({ response ->
+
+                                    Log.d("DECLINE_CF", "success = ${response.success}")
+                                    Log.d("DECLINE_CF", "message = ${response.message}")
+                                    Log.d("DECLINE_CF", "response = ${response.response}")
+
+                                    if (response.success) {
+
+                                        Toast.makeText(
+                                            activity,
+                                            "Decline request sent to rider",
+                                            Toast.LENGTH_SHORT
                                         ).show()
 
+                                    } else {
+
+                                        Snackbar.make(
+                                            view,
+                                            response.message,
+                                            Snackbar.LENGTH_LONG
+                                        ).show()
                                     }
-                                }, { t: Throwable? ->
+
                                     compositeDisposable.clear()
+
+                                }, { t ->
+
+                                    compositeDisposable.clear()
+
                                     Snackbar.make(
                                         view,
-                                        "error->" + t!!.message!!,
+                                        t.message ?: "Unknown error",
                                         Snackbar.LENGTH_LONG
                                     ).show()
 
-                                }
-                                ))
+                                })
+                        )
+
                     } else {
+
                         Snackbar.make(
                             view,
                             activity!!.getString(R.string.token_not_found),
@@ -152,11 +158,14 @@ object UserUtils {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Snackbar.make(view, "error->" + error.message, Snackbar.LENGTH_LONG).show()
+
+                    Snackbar.make(
+                        view,
+                        "error->${error.message}",
+                        Snackbar.LENGTH_LONG
+                    ).show()
                 }
             })
-
-
     }
 
 

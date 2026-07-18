@@ -267,15 +267,15 @@
                 android:orientation="vertical"
                 android:padding="12dp">
 
-                <include layout="@layout/item_review_shimmer"/>
+                <include layout="@layout/item_review_shimmer" />
 
-                <include layout="@layout/item_review_shimmer"/>
+                <include layout="@layout/item_review_shimmer" />
 
-                <include layout="@layout/item_review_shimmer"/>
+                <include layout="@layout/item_review_shimmer" />
 
-                <include layout="@layout/item_review_shimmer"/>
+                <include layout="@layout/item_review_shimmer" />
 
-                <include layout="@layout/item_review_shimmer"/>
+                <include layout="@layout/item_review_shimmer" />
 
             </LinearLayout>
 
@@ -286,10 +286,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No reviews yet"
-            android:textAlignment="center"
+            android:gravity="center"
+            android:text="No earning yet"
             android:textSize="18sp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </FrameLayout>
 

@@ -3,43 +3,52 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_splash_gradient">
+    android:background="@android:color/black">
 
+    <!-- Logo + App Name -->
     <LinearLayout
         android:id="@+id/layoutLogo"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical">
+       android:gravity="center"
+        android:orientation="vertical"
+        android:paddingBottom="60dp">
 
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
             android:src="@drawable/ic_splash_logo"
-            android:elevation="8dp"
-            android:contentDescription="@string/app_name" />
+            android:contentDescription="@string/app_name"
+            android:scaleType="fitXY"/>
 
         <TextView
             android:id="@+id/txtTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Ride Safe • Ride Smart"
-            android:textColor="#757575"
+            android:text="Fast • Safe • Reliable"
+            android:textColor="#9E9E9E"
             android:textSize="14sp" />
 
     </LinearLayout>
 
-    <include
-        android:id="@+id/loadingDots"
-        layout="@layout/view_loading_dots"
+    <!-- Bottom Loading -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="56dp"
-        android:visibility="gone"/>
+        android:layout_marginBottom="48dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/loadingDots"
+            layout="@layout/view_loading_dots"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

@@ -18,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -190,8 +191,16 @@ class DriverTripDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
             MarkerOptions().position(destination).title("Destination")
         )
 
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(origin, 14f))
+        val builder = LatLngBounds.Builder()
 
+        builder.include(origin)
+        builder.include(destination)
+
+        val bounds = builder.build()
+
+        map.animateCamera(
+            CameraUpdateFactory.newLatLngBounds(bounds, 150)
+        )
         drawRoute(origin, destination)
     }
 

@@ -325,3 +325,48 @@ exports.sendTripCompletedNotification = onRequest(async (req, res) => {
 
   }
 });
+
+exports.sendDeclineNotification = onRequest(async (req, res) => {
+    try {
+
+        const { riderToken, driverKey, requestId } = req.body;
+
+        if (!riderToken || !driverKey || !requestId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required parameters."
+            });
+        }
+
+        const message = {
+
+            token: riderToken,
+
+            data: {
+                title: "Decline",
+                body: "Driver declined your ride request",
+                driverKey: driverKey,
+                requestId: requestId
+            }
+
+        };
+
+        const response = await admin.messaging().send(message);
+
+        return res.status(200).json({
+            success: true,
+            message: "Decline notification sent successfully.",
+            response: response
+        });
+
+    } catch (error) {
+
+        console.error("Decline Notification Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+});

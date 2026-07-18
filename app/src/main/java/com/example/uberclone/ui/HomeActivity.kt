@@ -74,8 +74,11 @@ class HomeActivity : AppCompatActivity() {
 
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
         window.statusBarColor = getColor(R.color.black)
         window.navigationBarColor = getColor(R.color.black)
+
         setSupportActionBar(binding.appBarHome.toolbar)
 
         drawerLayout = binding.drawerLayout
@@ -308,7 +311,7 @@ class HomeActivity : AppCompatActivity() {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setTextColor(resources.getColor(android.R.color.holo_red_dark))
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                .setTextColor(resources.getColor(R.color.white))
+                .setTextColor(resources.getColor(R.color.black))
         }
         dialog.show()
 

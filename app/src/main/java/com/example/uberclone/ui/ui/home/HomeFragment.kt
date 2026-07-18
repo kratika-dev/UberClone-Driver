@@ -149,6 +149,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var circularProgressBar: CircularProgressBar
     private lateinit var txt_estimate_time: TextView
     private lateinit var txt_estimate_distance: TextView
+
+    private lateinit var txtPickupAddress: TextView
+    private lateinit var txtDestinationAddress: TextView
+    private lateinit var txtEstimatedFare: TextView
     private lateinit var root_layout: FrameLayout
 
     private var driverRequestReceived: DriverRequestReceived? = null
@@ -236,6 +240,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         init()
 
+        Log.d("AUTH_CHECK", "Driver UID = ${FirebaseAuth.getInstance().currentUser?.uid}")
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment =
             childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -286,6 +291,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 preparePickupNavigation(location, event.pickupLocation)
 
                 showIncomingRideRequestUI()
+
+                loadRideDetails(event.requestId){
+
+                }
 
                 startRideRequestCountdown()
 
@@ -352,6 +361,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         circularProgressBar = view.findViewById(R.id.circular_progress_bar) as CircularProgressBar
         txt_estimate_time = view.findViewById(R.id.txt_estimate_time) as TextView
         txt_estimate_distance = view.findViewById(R.id.txt_estimate_distance) as TextView
+        txtPickupAddress = view.findViewById(R.id.txt_pickup_address)
+        txtDestinationAddress = view.findViewById(R.id.txt_destination_address)
+        txtEstimatedFare = view.findViewById(R.id.txt_estimated_fare)
         root_layout = view.findViewById(R.id.root_layout) as FrameLayout
 
         layoutTripControl = view.findViewById(R.id.layout_trip_control)
@@ -376,6 +388,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         chip_accept.setOnClickListener {
             onAcceptRideClicked()
         }
+
 
         chip_decline.setOnClickListener {
             setupDeclineButton()
@@ -453,11 +466,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
 
-        fusedLocationProviderClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
+//        fusedLocationProviderClient.requestLocationUpdates(
+//            locationRequest,
+//            locationCallback,
+//            Looper.getMainLooper()
+//        )
     }
 
     private fun showLoading(message: String = "Please wait...") {
@@ -853,6 +866,25 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
                 override fun onPermissionGranted(permissions: PermissionGrantedResponse?) {
                     mMap.isMyLocationEnabled = true
+
+                    if (ActivityCompat.checkSelfPermission(
+                            requireContext(),
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(
+                            requireContext(),
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        return
+                    }
+
+                    fusedLocationProviderClient.requestLocationUpdates(
+                        locationRequest,
+                        locationCallback,
+                        Looper.getMainLooper()
+                    )
+
                     mMap.uiSettings.isMyLocationButtonEnabled = true
 
                     mMap.setOnMyLocationButtonClickListener {
@@ -909,6 +941,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
             })
 
+            .check()
 
         mMap.uiSettings.isZoomControlsEnabled = true
 
@@ -1519,6 +1552,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         layoutTripControl.visibility = View.GONE
         layout_accept.visibility = View.VISIBLE
+
+
+        txtPickupAddress.text = "Near Burhanpur Railway Station"
+        txtDestinationAddress.text = "Treasure Island Mall"
+        txt_estimate_distance.text = "6.2 km"
+        txtEstimatedFare.text = "₹148"
+        txt_estimate_time.text = "20 min"
+
     }
 
     private fun isWithinDistance(
@@ -1928,7 +1969,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             .child(requestId)
             .get()
             .addOnSuccessListener { snapshot ->
-
+                Log.d("RIDE_DETAILS", "requestId = $requestId")
+                Log.d("RIDE_DETAILS", "Snapshot exists = ${snapshot.exists()}")
                 if (!snapshot.exists()) return@addOnSuccessListener
 
                 hideLoading()
@@ -1943,6 +1985,36 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 val destinationLng =
                     snapshot.child("destinationLng")
                         .getValue(Double::class.java) ?: return@addOnSuccessListener
+
+
+                val pickupAddress =
+                    snapshot.child("pickupAddress")
+                        .getValue(String::class.java) ?: ""
+
+                Log.d("RIDE_DETAILS", "pickup = $pickupAddress")
+
+                val destinationAddress =
+                    snapshot.child("destinationAddress")
+                        .getValue(String::class.java) ?: ""
+
+                val duration =
+                    snapshot.child("duration")
+                        .getValue(String::class.java) ?: ""
+
+                val distance =
+                    snapshot.child("distance")
+                        .getValue(String::class.java) ?: ""
+
+                val estimatedFare =
+                    snapshot.child("estimatedFare")
+                        .getValue(Double::class.java) ?: 0.0
+
+
+                Log.d("RIDE_DETAILS", "pickup = $pickupAddress")
+                Log.d("RIDE_DETAILS", "destination = $destinationAddress")
+                Log.d("RIDE_DETAILS", "duration = $duration")
+                Log.d("RIDE_DETAILS", "distance = $distance")
+                Log.d("RIDE_DETAILS", "fare = $estimatedFare")
 
 
                 if (destinationLat == null || destinationLng == null) {
@@ -1965,6 +2037,21 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     destinationLat,
                     destinationLng
                 )
+
+                txtPickupAddress.text = pickupAddress
+                txtDestinationAddress.text = destinationAddress
+                txt_estimate_time.text = duration
+                txt_estimate_distance.text = distance
+                txtEstimatedFare.text = "₹${estimatedFare.toInt()}"
+
+
+
+                Log.d("UI_CHECK", "Pickup TextView = ${txtPickupAddress.text}")
+                Log.d("UI_CHECK", "Destination TextView = ${txtDestinationAddress.text}")
+                Log.d("UI_CHECK", "Duration TextView = ${txt_estimate_time.text}")
+                Log.d("UI_CHECK", "Distance TextView = ${txt_estimate_distance.text}")
+                Log.d("UI_CHECK", "Fare TextView = ${txtEstimatedFare.text}")
+
                 onSuccess()
             }.addOnFailureListener {
 

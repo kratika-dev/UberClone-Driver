@@ -2,6 +2,7 @@ package com.example.uberclone.remote
 
 import com.example.uberclone.model.AcceptNotificationRequest
 import com.example.uberclone.model.CancellationNotificationRequest
+import com.example.uberclone.model.DeclineNotificationRequest
 import com.example.uberclone.model.TripCompletedNotificationRequest
 import com.example.uberclone.model.TripStartedNotificationRequest
 import io.reactivex.rxjava3.core.Observable
@@ -28,6 +29,11 @@ interface CloudFunctionService {
     @POST("sendTripCompletedNotification")
     fun sendTripCompletedNotification(
         @Body body: TripCompletedNotificationRequest
+    ): Observable<CloudFunctionResponse>
+
+    @POST("sendDeclineNotification")
+    fun sendDeclineNotification(
+        @Body body: DeclineNotificationRequest
     ): Observable<CloudFunctionResponse>
 
 }

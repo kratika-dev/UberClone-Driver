@@ -69,77 +69,294 @@
 
 
         <!-- Request Panel -->
+
+
+
         <androidx.cardview.widget.CardView
             android:id="@+id/layout_accept"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="16dp"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="16dp"
             android:visibility="gone"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="8dp"
-            app:cardBackgroundColor="@color/white">
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="New Ride Request"
+            android:textColor="#111111"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginTop="2dp"
+                android:src="@android:drawable/ic_menu_mylocation"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pickup"
+                    android:textColor="#111111"
+                    android:textSize="15sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/txt_pickup_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="Near Burhanpur Railway Station"
+                    android:textColor="#757575"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="10dp"
+            android:background="#DADADA"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginTop="2dp"
+                android:src="@android:drawable/ic_menu_directions"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Destination"
+                    android:textColor="#111111"
+                    android:textSize="15sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/txt_destination_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="Treasure Island Mall"
+                    android:textColor="#757575"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="#EFEFEF"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <!-- Time -->
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <com.mikhaellopez.circularprogressbar.CircularProgressBar
                     android:id="@+id/circular_progress_bar"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
-                    android:layout_gravity="center" />
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                 />
 
                 <TextView
                     android:id="@+id/txt_estimate_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="12dp"
-                    android:text="5 mins"
+                    android:layout_marginTop="10dp"
+                    android:text="20 min"
+                    android:textColor="#111111"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time"
+                    android:textColor="#9E9E9E"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <!-- Distance -->
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@android:drawable/ic_menu_directions" />
 
                 <TextView
                     android:id="@+id/txt_estimate_distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="2.5 km"
-                    android:textSize="14sp" />
+                    android:layout_marginTop="10dp"
+                    android:text="6.2 km"
+                    android:textColor="#111111"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_accept"
-                        style="@style/Widget.MaterialComponents.Chip.Action"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Accept" />
-
-                    <Space
-                        android:layout_width="16dp"
-                        android:layout_height="wrap_content" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_decline"
-                        style="@style/Widget.MaterialComponents.Chip.Action"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Decline" />
-
-                </LinearLayout>
+                    android:text="Distance"
+                    android:textColor="#9E9E9E"
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
+            <!-- Fare -->
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@android:drawable/ic_dialog_info" />
+
+                <TextView
+                    android:id="@+id/txt_estimated_fare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="₹148"
+                    android:textColor="#111111"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fare"
+                    android:textColor="#9E9E9E"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_decline"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:checkable="false"
+                    android:clickable="true"
+                    android:text="Decline"
+                    android:textAllCaps="false"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    app:chipBackgroundColor="@android:color/white"
+                    app:chipCornerRadius="14dp"
+                    app:chipStrokeColor="#111111"
+                    app:chipStrokeWidth="1dp"
+                    app:rippleColor="#DDDDDD" />
+
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="wrap_content" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_accept"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:checkable="false"
+                    android:clickable="true"
+                    android:text="Accept"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    app:chipBackgroundColor="#111111"
+                    app:chipCornerRadius="14dp"
+                    app:rippleColor="#444444" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
         </androidx.cardview.widget.CardView>
+
+
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/layout_trip_control"
